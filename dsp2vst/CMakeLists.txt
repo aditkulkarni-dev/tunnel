@@ -108,13 +108,13 @@ if(EFFECT_NAME STREQUAL "EffectName")
     message(WARNING "Default EFFECT_NAME is still set")
 endif()
 
-target_sources(
-    ${PLUGIN_NAME} PRIVATE
-    src/${EFFECT_NAME}/PluginProcessor.cpp
-    src/${EFFECT_NAME}/PluginProcessor.h
-    src/${EFFECT_NAME}/PluginEditor.h
-    src/${EFFECT_NAME}/PluginEditor.cpp
-)
+# target_sources(
+#     ${PLUGIN_NAME} PRIVATE
+#     src/${EFFECT_NAME}/PluginProcessor.cpp
+#     src/${EFFECT_NAME}/PluginProcessor.h
+#     src/${EFFECT_NAME}/PluginEditor.h
+#     src/${EFFECT_NAME}/PluginEditor.cpp
+# )
 
 # Add effect-specific source files here
 
@@ -149,3 +149,8 @@ target_link_libraries(mainApp PRIVATE AudioEngineLib)
 
 add_executable(benchmarkApp src/app/benchmark_main.cpp)
 target_link_libraries(benchmarkApp PRIVATE AudioEngineLib)
+
+add_library(SurfaceLib STATIC src/RTClasses/RayUtils.cpp
+ src/RTClasses/Surfaces.cpp)
+add_executable(surface_test src/app/main_surface_test.cpp)
+target_link_libraries(surface_test PRIVATE SurfaceLib)
