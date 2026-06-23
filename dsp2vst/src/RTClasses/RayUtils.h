@@ -1,4 +1,5 @@
 #include <vector>
+#include <ostream>
 
 struct Vector3D{
     float x,y,z;
@@ -6,9 +7,11 @@ struct Vector3D{
     Vector3D operator-(const Vector3D& other) const;
     Vector3D operator*(const Vector3D& other) const;
     Vector3D operator*(float scalar) const;
+    friend std::ostream& operator<<(std::ostream& os, const Vector3D& v);
     float dot(const Vector3D& other) const;
     Vector3D cross(const Vector3D& other) const;
     Vector3D normalize() const;
+
 };
 
 struct Ray{
@@ -25,8 +28,8 @@ struct RayState{
 };
 
 struct HitRecord{
-    bool didHit = false;
-    float t = -1.0f;
+    bool didHit;
+    float t;
     Vector3D hitPoint;
     Vector3D surfaceNormal;
 };
