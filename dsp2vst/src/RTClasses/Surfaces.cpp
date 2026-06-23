@@ -18,10 +18,10 @@ HitRecord PlaneWall::calculateIntersection(const Ray &ray) const
     the intersection of valid.
 
     */
-   float numerator = - (normal.dot(ray.origin) + d);
+   float numerator = - (normal.dot(ray.origin) - planeConstant);
    float deno = (normal.dot(ray.direction));
 
-   if (deno < EPSILON){
+   if (std::abs(deno) < EPSILON){
     return HitRecord();
    }
 
@@ -30,7 +30,20 @@ HitRecord PlaneWall::calculateIntersection(const Ray &ray) const
     return HitRecord();
    }
 
+   Vector3D P_intersection = ray.origin + ray.direction*t;
    
+   Vector3D local = P_intersection - pointOnSurface;
+   float uCoord = local.dot(u);
+   float vCoord = local.dot(v);
+
+   if (std::abs(uCoord) <= width / 2 &&
+    std::abs(vCoord) <= height / 2)
+    {
+        return HitRecord({true, t, P_intersection, normal});
+    }
 
     return HitRecord();
+   
+
+    
 }

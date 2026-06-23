@@ -1,26 +1,44 @@
 #include "Surface.h"
 
 // ax + by + cz + d = 0
-class PlaneWall : Surface{
+class PlaneWall : public Surface{
 private:
     // defines the surface
-    float d;
     Vector3D normal;
-    
-    // constrains the surface
-    float minX, maxX, minY, maxY, minZ, maxZ;
+    Vector3D pointOnSurface;
 
+    // constrains the surface
+    Vector3D u;
+    Vector3D v;
+    
+    float height;
+    float width;
+    float planeConstant;
 
     // for checking edge-cases
     static constexpr float EPSILON = 1e-6f;
 
 public:
-    PlaneWall( Vector3D norm, float d,
-        float abs, float x0, float x1, float y0, float y1, float z0, float z1):
-        Surface(abs), minX(x0), maxX(x1),
-        minY(y0), maxY(y1), minZ(z0), maxZ(z1), d(d), normal(norm)
+    PlaneWall( Vector3D pointOnSurface, Vector3D norm,
+        float abs, float height, float width):
+        Surface(abs), normal(norm), height(height), width(width),
+        pointOnSurface(pointOnSurface)
         {
+            
+            normal = norm.normalize();
+            planeConstant = normal.dot(this->pointOnSurface);
+            Vector3D xAxis({1, 0, 0});
+            Vector3D yAxis({0, 1, 0});
 
+            Vector3D helper;
+
+            if (std::abs(normal.dot(xAxis)) < 0.9f)
+                helper = xAxis;
+            else
+                helper = yAxis;
+
+            u = (normal.cross(helper).normalize());
+            v = (normal.cross(u).normalize());
         }
 
         HitRecord calculateIntersection(const Ray& ray) const override;
