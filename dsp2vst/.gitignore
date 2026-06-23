@@ -1,0 +1,25 @@
+# executables
+*.exe
+*.out
+
+# object files
+*.o
+
+# build files
+/build
+
+# VS Code
+.vscode/
+
+# audio
+output.wav
+input.wav
+
+# vcpkg
+vcpkg/
+
+# cache
+.cache/
+
+# juce code
+./src/juce

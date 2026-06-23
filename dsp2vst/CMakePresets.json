@@ -1,0 +1,20 @@
+
+
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-x64-vcpkg",
+      "displayName": "Windows x64 (vcpkg)",
+      "description": "Target Windows 64-bit using vcpkg dependencies",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "toolset": "host=x64",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_TOOLCHAIN_FILE": "C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    }
+  ]
+}
