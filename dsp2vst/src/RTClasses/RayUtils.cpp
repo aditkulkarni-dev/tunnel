@@ -49,6 +49,11 @@ Vector3D Vector3D::normalize() const
     });
 }
 
+float Vector3D::length() const
+{
+    return std::sqrt(x*x + y*y + z*z);
+}
+
 std::ostream &operator<<(std::ostream &os, const Vector3D &v)
 {
     // TODO: insert return statement here
@@ -58,4 +63,11 @@ std::ostream &operator<<(std::ostream &os, const Vector3D &v)
        << v.z << ")";
 
     return os;
+}
+
+Vector3D reflect(Vector3D ray_direction, Vector3D surface_normal)
+{
+    Vector3D d = ray_direction.normalize();
+    Vector3D n = surface_normal.normalize();
+    return (d - n * d.dot(n) * 2);
 }

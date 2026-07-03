@@ -1,3 +1,4 @@
+#pragma once
 #include "Surface.h"
 
 // ax + by + cz + d = 0

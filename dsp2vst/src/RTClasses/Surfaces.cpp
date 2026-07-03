@@ -1,4 +1,5 @@
 #include "Surfaces.h"
+#include <iostream>
 
 HitRecord PlaneWall::calculateIntersection(const Ray &ray) const
 {   
@@ -21,12 +22,14 @@ HitRecord PlaneWall::calculateIntersection(const Ray &ray) const
    float numerator = - (normal.dot(ray.origin) - planeConstant);
    float deno = (normal.dot(ray.direction));
 
+    
+
    if (std::abs(deno) < EPSILON){
     return HitRecord();
    }
 
    float t = numerator / deno;
-   if (t < 0.0f){
+   if (t <= 0.0f){
     return HitRecord();
    }
 

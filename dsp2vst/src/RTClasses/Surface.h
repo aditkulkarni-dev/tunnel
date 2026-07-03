@@ -1,3 +1,4 @@
+#pragma once
 #include "RayUtils.h"
 class Surface{
     protected:
