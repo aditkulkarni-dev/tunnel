@@ -21,6 +21,7 @@ struct Ray{
     Vector3D direction; // Must be normalized
     float accumulatedDistance;
     std::vector<float> absorptionHistory;
+    int id;
 
     Ray(const Vector3D& o, const Vector3D& d)
         : accumulatedDistance(0.0f), origin(o), direction(d.normalize())

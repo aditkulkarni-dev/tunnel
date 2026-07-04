@@ -3,7 +3,7 @@
 RoomIRSimulator::RoomIRSimulator(const Scene& scene, IRSimulationConfig config)
     : scene(scene), config(config) {}
 
-SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays) const {
+SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints) const {
     SparseIR sparseIR{};
 
     // All rays are assumed to share a listener origin, matching the
@@ -18,8 +18,10 @@ SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays) const {
     // each Ray between bounces) - same role your `i`/`r` loop variables
     // played in the original.
     for (int bounce = 0; bounce < config.numBounces; ++bounce) {
-        for (auto& ray : rays) {
-            advanceRay(ray, sparseIR);
+        for (int r{0}; r < rays.size(); ++r) {
+            auto& ray = rays[r];
+            ray.id = r;
+            advanceRay(ray, sparseIR, hitPoints);
         }
     }
 
@@ -41,7 +43,7 @@ void RoomIRSimulator::addDirectPathIfVisible(const Vector3D& listenerPos, Sparse
     outIR.rays.push_back(directRay);
 }
 
-bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
+bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR, std::vector<std::pair<int, Vector3D>>& hitPoints) const {
     HitRecord hit;
     Surface* hitSurface = nullptr;
 
@@ -66,7 +68,9 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
     }
 
     ray.origin = shadowOrigin;
+    hitPoints.push_back({ray.id, shadowOrigin});
     ray.direction = reflect(ray.direction, hit.surfaceNormal);
+
     return true;
 }
 
