@@ -3,6 +3,7 @@
 #include "../RTClasses/Scene.h"
 #include "../RTClasses/RoomIRSimulator.h"
 #include "../helpers/CSVWriter.h"
+#include "../helpers/render.h"
 #include <iostream>
 #include <math.h>
 #include <random>
@@ -37,27 +38,47 @@ void generateRandomVectors(std::vector<Ray>& rays, const Vector3D& origin, int r
 }
 
 int main(){
-    int N_ITERS{200};
     std::vector<std::pair<int, Vector3D>> hitPoints;
 
     Vector3D SRC_POS{0.0f, 0.0f, 0.0f};
     Scene scene;
+    // Left / Right
     scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{1, 0, 0}, Vector3D{-1, 0, 0}, 0.5f, 2.0f, 2.0f));
+        Vector3D{15,0,0}, Vector3D{-1,0,0}, 0.0f, 20.0f, 10.0f));
     scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{-1, 0, 0}, Vector3D{1, 0, 0}, 0.5f, 2.0f, 2.0f));
+        Vector3D{-15,0,0}, Vector3D{1,0,0}, 0.0f, 20.0f, 10.0f));
+
+    // Front / Back
     scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0, 1, 0}, Vector3D{0, -1, 0}, 0.5f, 2.0f, 2.0f));
+        Vector3D{0,20,0}, Vector3D{0,-1,0}, 0.0f, 30.0f, 10.0f));
     scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0, -1, 0}, Vector3D{0, 1, 0}, 0.5f, 2.0f, 2.0f));
+        Vector3D{0,-20,0}, Vector3D{0,1,0}, 0.0f, 30.0f, 10.0f));
+
+    // Ceiling / Floor
     scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0, 0, 1}, Vector3D{0, 0, -1}, 0.5f, 2.0f, 2.0f));
+        Vector3D{0,0,8}, Vector3D{0,0,-1}, 0.0f, 30.0f, 40.0f));
     scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0, 0, -1}, Vector3D{0, 0, 1}, 0.5f, 2.0f, 2.0f));
- 
+        Vector3D{0,0,-2}, Vector3D{0,0,1}, 0.0f, 30.0f, 40.0f));
+
+    scene.addSurface(std::make_unique<PlaneWall>(
+    Vector3D{0,5,0},
+    Vector3D{1,-1,0}.normalize(),
+    0.0f,
+    6.0f,
+    6.0f));
+
+    scene.addSurface(std::make_unique<PlaneWall>(
+    Vector3D{4,-3,2},
+    Vector3D{-1,1,0}.normalize(),
+    0.0f,
+    5.0f,
+    4.0f));
+
+
+    
     IRSimulationConfig config;
-    config.sourcePosition = {0.0f, 0.0f, 0.0f};
-    config.numBounces = 64;
+    config.sourcePosition = {-8, -10, 1.5f};
+    config.numBounces = 200;
  
     RoomIRSimulator simulator(scene, config);
  
@@ -66,7 +87,7 @@ int main(){
      
     };
    
-    generateRandomVectors(rays, origin, 64);
+    generateRandomVectors(rays, origin, 500000);
  
     SparseIR sparseIR = simulator.simulate(rays, hitPoints);
  
@@ -88,5 +109,6 @@ int main(){
 
     writePointsToCSV(hitPoints);
     writeIRToCSV(sparseIR);
+    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/ir_test_inverse_decay.wav");
     return 0;
 }

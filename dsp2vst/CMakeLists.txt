@@ -158,4 +158,4 @@ add_library(SurfaceLib STATIC
  
  )
 add_executable(surface_test src/app/main_surface_test.cpp)
-target_link_libraries(surface_test PRIVATE SurfaceLib)
+target_link_libraries(surface_test PRIVATE SurfaceLib SndFileTarget)

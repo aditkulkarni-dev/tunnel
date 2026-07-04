@@ -1,10 +1,18 @@
 #include "RoomIRSimulator.h"
+#include <thread>
 
 RoomIRSimulator::RoomIRSimulator(const Scene& scene, IRSimulationConfig config)
     : scene(scene), config(config) {}
 
 SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints) const {
+    
     SparseIR sparseIR{};
+    if (rays.empty()) return sparseIR;
+    std::vector<std::thread> workers;
+    int THREADS = std::min(20, (int)rays.size());
+    int stride = (rays.size() + THREADS - 1) / THREADS;
+    std::vector<SparseIR> threadIR(THREADS);
+    std::vector<std::vector<std::pair<int, Vector3D>>> threadHits(THREADS);
 
     // All rays are assumed to share a listener origin, matching the
     // single-listener setup this was ported from.
@@ -12,19 +20,28 @@ SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<
         addDirectPathIfVisible(rays.front().origin, sparseIR);
     }
 
-    // Bounce-major: every ray takes step 0, then every ray takes step 1,
-    // etc. `rays` is mutated in place across iterations (accumulated
-    // distance, absorption history, current origin/direction all live on
-    // each Ray between bounces) - same role your `i`/`r` loop variables
-    // played in the original.
-    for (int bounce = 0; bounce < config.numBounces; ++bounce) {
-        for (int r{0}; r < rays.size(); ++r) {
-            auto& ray = rays[r];
-            ray.id = r;
-            advanceRay(ray, sparseIR, hitPoints);
-        }
+    for (int t{0}; t < THREADS; ++t){
+        workers.emplace_back([&, t](){
+            for(int r{t*stride}; r < (t+1)*stride && r < rays.size(); ++r){
+                auto ray = rays[r];
+                for (int bounce = 0; bounce < config.numBounces; ++bounce) {
+                    advanceRay(ray, threadIR[t], threadHits[t]);
+                }
+            }
+        });
     }
 
+    for (auto& w : workers){
+        w.join();
+    }
+
+    for (int t = 0; t < THREADS; ++t) {
+        merge(threadIR[t], sparseIR);
+        hitPoints.insert(hitPoints.end(),
+                        threadHits[t].begin(),
+                        threadHits[t].end());
+    }
+    
     return sparseIR;
 }
 
@@ -68,7 +85,6 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR, std::vector<std::pai
     }
 
     ray.origin = shadowOrigin;
-    hitPoints.push_back({ray.id, shadowOrigin});
     ray.direction = reflect(ray.direction, hit.surfaceNormal);
 
     return true;
@@ -87,5 +103,21 @@ float RoomIRSimulator::computeEnergy(float totalDistance, const std::vector<floa
     for (float absorption : absorptionHistory) {
         energy *= (1.0f - absorption);
     }
-    return energy / (1.0f + totalDistance * totalDistance);
+    return energy / std::max(totalDistance, 1.0f);
+}
+
+void RoomIRSimulator::merge(const SparseIR &src, SparseIR &dst)
+{
+
+    dst.gains.insert(dst.gains.end(),
+                     src.gains.begin(),
+                     src.gains.end());
+
+    dst.delays.insert(dst.delays.end(),
+                      src.delays.begin(),
+                      src.delays.end());
+
+    dst.rays.insert(dst.rays.end(),
+                    src.rays.begin(),
+                    src.rays.end());
 }

@@ -8,24 +8,10 @@ delays = ir["delay"]
 gains = ir["gain"]
 
 # Create figure
-fig, ax = plt.subplots(figsize=(12, 5))
-
-# Stem plot
-markerline, stemlines, baseline = ax.stem(
-    delays,
-    gains,
-    linefmt='C0-',
-    markerfmt='C0o',
-    basefmt='k-'
-)
-
-plt.setp(markerline, markersize=4)
-plt.setp(stemlines, linewidth=1)
-
-ax.set_title("Sparse Room Impulse Response")
-ax.set_xlabel("Path Length (m)")
-ax.set_ylabel("Gain")
-ax.grid(True, alpha=0.3)
-
-plt.tight_layout()
+plt.figure(figsize=(12,5))
+plt.loglog(delays, gains, '.')
+plt.xlabel("Path length (m) (log)")
+plt.ylabel("Gain (log scale)")
+plt.title("Sparse IR Energy Decay")
+plt.grid(True, which="both", alpha=0.3)
 plt.show()

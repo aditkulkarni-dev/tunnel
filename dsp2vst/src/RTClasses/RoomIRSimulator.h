@@ -57,7 +57,7 @@ private:
     // product of per-bounce reflection coefficients (1 - absorption).
     static float computeEnergy(float totalDistance, const std::vector<float>& absorptionHistory);
 
-
+    static void merge(const SparseIR& src, SparseIR& dst);
     const Scene& scene;
     IRSimulationConfig config;
 };
