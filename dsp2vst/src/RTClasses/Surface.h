@@ -1,5 +1,6 @@
 #pragma once
-#include "RayUtils.h"
+#include "./Geometry.h"
+
 class Surface{
     protected:
         float absorptionCoefficient;
@@ -10,6 +11,6 @@ class Surface{
         virtual ~Surface() = default;
 
         virtual HitRecord calculateIntersection(const Ray& ray) const = 0;
-        float getAbsorption() const {return absorptionCoefficient; }
+        virtual float getAbsorption() const {return absorptionCoefficient; }
         
 };

@@ -1,4 +1,5 @@
-#include "RayUtils.h"
+
+#include "Geometry.h"
 
 Vector3D Vector3D::operator+(const Vector3D &other) const
 {
@@ -65,9 +66,4 @@ std::ostream &operator<<(std::ostream &os, const Vector3D &v)
     return os;
 }
 
-Vector3D reflect(Vector3D ray_direction, Vector3D surface_normal)
-{
-    Vector3D d = ray_direction.normalize();
-    Vector3D n = surface_normal.normalize();
-    return (d - n * d.dot(n) * 2);
-}
+
