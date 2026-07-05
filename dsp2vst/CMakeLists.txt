@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)  # JUCE requires 3.22 minimum
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG")
 project(audio-engine VERSION 1.0.0)
 
 
@@ -21,14 +23,14 @@ endif()
 
 
 # JUCE
-include(FetchContent)
-FetchContent_Declare(
-    JUCE
-    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-    GIT_TAG 8.0.13
-)
+# include(FetchContent)
+# FetchContent_Declare(
+#     JUCE
+#     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+#     GIT_TAG 8.0.13
+# )
 
-FetchContent_MakeAvailable(JUCE)
+# FetchContent_MakeAvailable(JUCE)
 
 
 # Platform-Specific Dependencies (sndfile)
@@ -49,22 +51,32 @@ endif()
 # Fetch kissfft
 
 
-FetchContent_Declare(
-    kissfft
-    GIT_REPOSITORY https://github.com/mborgerding/kissfft.git
-    GIT_TAG 7bce415
-)
+# FetchContent_Declare(
+#     kissfft
+#     GIT_REPOSITORY https://github.com/mborgerding/kissfft.git
+#     GIT_TAG 7bce415
+# )
 
-set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
-set(KISSFFT_TOOLS OFF CACHE BOOL "" FORCE)
-set(KISSFFT_TEST OFF CACHE BOOL "" FORCE)
+# set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
+# set(KISSFFT_TOOLS OFF CACHE BOOL "" FORCE)
+# set(KISSFFT_TEST OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(kissfft)
+# FetchContent_MakeAvailable(kissfft)
 
 
 # Audio Engine Library
 # Add the paths of the .cpp files you wish to link for the audio engine inside add_library
 
+add_library(CoreDSP STATIC
+    src/effects/FfDelay.cpp
+    src/effects/EffectChain.cpp
+    src/dsp/CircularBuffer.cpp
+    src/io/AudioFileIO.cpp
+)
+target_link_libraries(CoreDSP
+    PUBLIC
+        SndFileTarget
+)
 
 add_library(AudioEngineLib STATIC
     src/audio/AudioEngine.cpp
@@ -73,40 +85,41 @@ add_library(AudioEngineLib STATIC
 target_include_directories(AudioEngineLib
     PUBLIC
         src
-        ${kissfft_SOURCE_DIR}
+        # ${kissfft_SOURCE_DIR}
 )
 
 target_link_libraries(AudioEngineLib
     PUBLIC
+        CoreDSP
         SndFileTarget
-        kissfft
+        
 )
 
 # Modify the parameters of the plugin-generation as per your needs
 # Set your plugin name here.
 set(PLUGIN_NAME UserPlugin)
 
-juce_add_plugin(${PLUGIN_NAME}
-    COMPANY_NAME "YourCompany"
-    IS_SYNTH FALSE
-    NEEDS_MIDI_INPUT FALSE
-    NEEDS_MIDI_OUTPUT FALSE
-    IS_MIDI_EFFECT FALSE
-    EDITOR_WANTS_KEYBOARD_FOCUS FALSE
-    FORMATS VST3 Standalone
-    PRODUCT_NAME ${PLUGIN_NAME}
+# juce_add_plugin(${PLUGIN_NAME}
+#     COMPANY_NAME "YourCompany"
+#     IS_SYNTH FALSE
+#     NEEDS_MIDI_INPUT FALSE
+#     NEEDS_MIDI_OUTPUT FALSE
+#     IS_MIDI_EFFECT FALSE
+#     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
+#     FORMATS VST3 Standalone
+#     PRODUCT_NAME ${PLUGIN_NAME}
 
-)
+# )
 
 #Set your Effect name here, which is also the directory where your PluginProcessor.h, etc. live in.
-set(EFFECT_NAME EffectName)
-if(EFFECT_NAME STREQUAL "")
-    message(FATAL_ERROR "EFFECT_NAME is empty. Set your effect folder name.")
-endif()
+# set(EFFECT_NAME EffectName)
+# if(EFFECT_NAME STREQUAL "")
+#     message(FATAL_ERROR "EFFECT_NAME is empty. Set your effect folder name.")
+# endif()
 
-if(EFFECT_NAME STREQUAL "EffectName")
-    message(WARNING "Default EFFECT_NAME is still set")
-endif()
+# if(EFFECT_NAME STREQUAL "EffectName")
+#     message(WARNING "Default EFFECT_NAME is still set")
+# endif()
 
 # target_sources(
 #     ${PLUGIN_NAME} PRIVATE
@@ -124,23 +137,23 @@ add_library(
 
 )
 
-target_link_libraries(
-    ${PLUGIN_NAME} PRIVATE
-    EffectLib
+# target_link_libraries(
+#     ${PLUGIN_NAME} PRIVATE
+#     EffectLib
 
-    juce::juce_audio_utils
-    juce::juce_audio_processors
-    juce_recommended_config_flags
-    juce_recommended_lto_flags
-    juce_recommended_warning_flags
-)
-target_compile_definitions(${PLUGIN_NAME}
-    PUBLIC
-        JUCE_WEB_BROWSER=0
-        JUCE_USE_CURL=0
-        JUCE_VST3_CAN_REPLACE_VST2=0 
-)
-juce_generate_juce_header(${PLUGIN_NAME})
+#     juce::juce_audio_utils
+#     juce::juce_audio_processors
+#     juce_recommended_config_flags
+#     juce_recommended_lto_flags
+#     juce_recommended_warning_flags
+# )
+# target_compile_definitions(${PLUGIN_NAME}
+#     PUBLIC
+#         JUCE_WEB_BROWSER=0
+#         JUCE_USE_CURL=0
+#         JUCE_VST3_CAN_REPLACE_VST2=0 
+# )
+# juce_generate_juce_header(${PLUGIN_NAME})
 
 # Main / Benchmark Applications
 
