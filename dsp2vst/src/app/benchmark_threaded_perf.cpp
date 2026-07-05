@@ -7,6 +7,8 @@
 #include "../helpers/VectorGen.h"
 #include <iostream>
 #include <math.h>
+#include <chrono>
+#include <iomanip>
 
 
 int main(){
@@ -58,29 +60,30 @@ int main(){
     std::vector<Ray> rays{
      
     };
-   
-    generateRandomVectors(rays, origin, 500000);
- 
-    SparseIR sparseIR = simulator.simulate(rays, hitPoints);
- 
-    std::cout << "Sparse IR Delays:\n";
-    for (size_t i = 0; i < sparseIR.delays.size() && i <= 10; ++i) {
-        std::cout << sparseIR.delays[i] << " ";
-    }
-    std::cout << "\n";
-    std::cout << "Delays size : " << sparseIR.delays.size();
-    std::cout << "\n";
- 
-    std::cout << "Sparse IR Gains:\n";
-    for (size_t i = 0; i < sparseIR.gains.size() && i <= 10; ++i) {
-        std::cout << sparseIR.gains[i] << " ";
-    }
-    std::cout << "\n";
-    std::cout << "Gains size : " << sparseIR.gains.size();
-    std::cout << "\n";
+    generateRandomVectors(rays, origin, 25000);
+    std::vector<int> num_threads{1,2,4,8,16};
+    
+    std::cout << std::left
+          << std::setw(10) << "Threads"
+          << std::setw(15) << "Time (ms)"
+          << '\n';
 
-    writePointsToCSV(hitPoints);
-    writeIRToCSV(sparseIR);
-    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/ir_test_inverse_decay.wav");
+    const int NUM_RUNS = 5;
+
+    for (int num_t : num_threads){
+        double total_ms = 0.0;
+        for (int i = 0; i < NUM_RUNS; i++)
+            {
+                hitPoints.clear();
+                auto start = std::chrono::high_resolution_clock::now();
+                SparseIR sparseIR = simulator.simulate(rays, hitPoints, num_t);
+                auto end = std::chrono::high_resolution_clock::now();
+                total_ms += std::chrono::duration<double, std::milli>(end - start).count();
+            }
+        std::cout << num_t << " threads -> "
+                << total_ms / NUM_RUNS
+                << " ms\n";
+        }
+
     return 0;
 }

@@ -4,12 +4,12 @@
 RoomIRSimulator::RoomIRSimulator(const Scene& scene, IRSimulationConfig config)
     : scene(scene), config(config) {}
 
-SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints) const {
+SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads) const {
     
     SparseIR sparseIR{};
     if (rays.empty()) return sparseIR;
     std::vector<std::thread> workers;
-    int THREADS = std::min(20, (int)rays.size());
+    int THREADS = std::min(threads, (int)rays.size());
     int stride = (rays.size() + THREADS - 1) / THREADS;
     std::vector<SparseIR> threadIR(THREADS);
     std::vector<std::vector<std::pair<int, Vector3D>>> threadHits(THREADS);
@@ -25,7 +25,7 @@ SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<
             for(int r{t*stride}; r < (t+1)*stride && r < rays.size(); ++r){
                 auto ray = rays[r];
                 for (int bounce = 0; bounce < config.numBounces; ++bounce) {
-                    advanceRay(ray, threadIR[t], threadHits[t]);
+                    advanceRay(ray, threadIR[t]);
                 }
             }
         });
@@ -37,9 +37,9 @@ SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<
 
     for (int t = 0; t < THREADS; ++t) {
         merge(threadIR[t], sparseIR);
-        hitPoints.insert(hitPoints.end(),
-                        threadHits[t].begin(),
-                        threadHits[t].end());
+        // hitPoints.insert(hitPoints.end(),
+        //                 threadHits[t].begin(),
+        //                 threadHits[t].end());
     }
     
     return sparseIR;
@@ -60,7 +60,7 @@ void RoomIRSimulator::addDirectPathIfVisible(const Vector3D& listenerPos, Sparse
     outIR.rays.push_back(directRay);
 }
 
-bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR, std::vector<std::pair<int, Vector3D>>& hitPoints) const {
+bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
     HitRecord hit;
     Surface* hitSurface = nullptr;
 

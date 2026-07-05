@@ -35,7 +35,7 @@ public:
     // stay consistent across rays at each timestep. Accumulates all
     // NEE-visible paths (plus the direct path, if unobstructed) into a
     // single SparseIR.
-    SparseIR simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints) const;
+    SparseIR simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads=16) const;
 
 private:
     // Direct line-of-sight contribution from source to listenerPos, logged
@@ -47,7 +47,7 @@ private:
     // then reflects the ray off the surface it hit. Mutates `ray` in place.
     // Returns false if the ray hit nothing (escaped the scene), in which
     // case the caller should stop advancing it.
-    bool advanceRay(Ray& ray, SparseIR& outIR, std::vector<std::pair<int, Vector3D>>& hitPoints) const;
+    bool advanceRay(Ray& ray, SparseIR& outIR) const;
 
     // Fires a shadow ray from `origin` toward the source. Returns true and
     // fills outDistance with the source distance if the path is unobstructed.
