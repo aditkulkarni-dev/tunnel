@@ -7,6 +7,7 @@ class Surface{
         
     
     public:
+        Surface() = default;
         Surface(float absorption) : absorptionCoefficient(absorption) {}
         virtual ~Surface() = default;
 

@@ -1,6 +1,44 @@
 #pragma once
 #include "Surface.h"
 
+
+
+class Triangle : public Surface{
+private:
+    
+    Vector3D A;
+    Vector3D B;
+    Vector3D C;
+    Vector3D e1;
+    Vector3D e2;
+    Vector3D N;
+    float absorption;
+    static constexpr float EPSILON = 1e-6f;
+
+
+public:
+
+    Triangle(Vector3D A, Vector3D B, Vector3D C, float absorption):
+    e1(B-A), e2(C-A), absorption(absorption), A(A), B(B), C(C)
+    {
+        Vector3D e1xe2 = e1.cross(e2);
+        float length = e1xe2.length();
+        if(length > EPSILON){
+            N = (e1xe2)*(1.0f/length);
+        }
+        
+    }
+    HitRecord calculateIntersection(const Ray& ray) const override;
+
+};
+
+
+
+
+
+
+
+
 // ax + by + cz + d = 0
 class PlaneWall : public Surface{
 private:

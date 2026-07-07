@@ -14,8 +14,6 @@ SparseIR RoomIRSimulator::simulate(std::vector<Ray> rays, std::vector<std::pair<
     std::vector<SparseIR> threadIR(THREADS);
     std::vector<std::vector<std::pair<int, Vector3D>>> threadHits(THREADS);
 
-    // All rays are assumed to share a listener origin, matching the
-    // single-listener setup this was ported from.
     if (!rays.empty()) {
         addDirectPathIfVisible(rays.front().origin, sparseIR);
     }

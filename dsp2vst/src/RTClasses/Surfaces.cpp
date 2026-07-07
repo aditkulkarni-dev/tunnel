@@ -50,3 +50,39 @@ HitRecord PlaneWall::calculateIntersection(const Ray &ray) const
 
     
 }
+
+HitRecord Triangle::calculateIntersection(const Ray &ray) const
+{
+    Vector3D D = ray.direction;
+    Vector3D H = D.cross(e2);
+    Vector3D S = ray.origin - A;
+
+    float det = e1.dot(H);
+
+    if (std::abs(det) < EPSILON){return HitRecord(); }
+
+    float f = 1/det;
+    float u = f * (S.dot(H));
+
+    if ( (u < 0) || (u > 1)){
+        return HitRecord();
+    }
+
+    Vector3D Q = S.cross(e1);
+    float v = f * (D.dot(Q));
+
+    if ( (v<0) || ( (u+v) > 1 ) ){
+        return HitRecord();
+    }
+
+    float t = f * (e2.dot(Q));
+
+    if (t < EPSILON){
+        return HitRecord();
+    }
+
+    Vector3D hitPoint = ray.origin + D*t;
+
+    
+    return HitRecord({true, t, hitPoint, N});
+}
