@@ -175,3 +175,10 @@ target_link_libraries(surface_test PRIVATE SurfaceLib SndFileTarget)
 
 add_executable(benchmark_threads src/app/benchmark_threaded_perf.cpp)
 target_link_libraries(benchmark_threads PRIVATE SurfaceLib SndFileTarget)
+
+add_library(ObjLoaderLib STATIC src/RTClasses/ObjLoader.cpp)
+add_executable(test_loader src/app/test_loader.cpp)
+target_link_libraries(test_loader PRIVATE
+                    SurfaceLib
+                    ObjLoaderLib                
+                    )

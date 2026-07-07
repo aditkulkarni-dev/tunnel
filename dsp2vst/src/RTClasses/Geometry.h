@@ -4,6 +4,13 @@
 
 struct Vector3D{
     float x,y,z;
+
+    Vector3D() = default;
+
+    Vector3D(float x, float y, float z)
+        : x(x), y(y), z(z)
+    {}
+    
     Vector3D operator+(const Vector3D& other) const;
     Vector3D operator-(const Vector3D& other) const;
     Vector3D operator*(const Vector3D& other) const;
