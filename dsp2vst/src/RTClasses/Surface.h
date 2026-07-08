@@ -10,8 +10,9 @@ class Surface{
         Surface() = default;
         Surface(float absorption) : absorptionCoefficient(absorption) {}
         virtual ~Surface() = default;
-
+        float getAbsorption() const {
+            return absorptionCoefficient;
+        }
         virtual HitRecord calculateIntersection(const Ray& ray) const = 0;
-        virtual float getAbsorption() const {return absorptionCoefficient; }
         
 };

@@ -5,61 +5,35 @@
 #include "../helpers/CSVWriter.h"
 #include "../helpers/render.h"
 #include "../helpers/VectorGen.h"
+#include "../RTClasses/ObjLoader.h"
 #include <iostream>
 #include <math.h>
 
 
 int main(){
     std::vector<std::pair<int, Vector3D>> hitPoints;
-
-    Vector3D SRC_POS{0.0f, 0.0f, 0.0f};
     Scene scene;
-    // Left / Right
-    scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{15,0,0}, Vector3D{-1,0,0}, 0.0f, 20.0f, 10.0f));
-    scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{-15,0,0}, Vector3D{1,0,0}, 0.0f, 20.0f, 10.0f));
-
-    // Front / Back
-    scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0,20,0}, Vector3D{0,-1,0}, 0.0f, 30.0f, 10.0f));
-    scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0,-20,0}, Vector3D{0,1,0}, 0.0f, 30.0f, 10.0f));
-
-    // Ceiling / Floor
-    scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0,0,8}, Vector3D{0,0,-1}, 0.0f, 30.0f, 40.0f));
-    scene.addSurface(std::make_unique<PlaneWall>(
-        Vector3D{0,0,-2}, Vector3D{0,0,1}, 0.0f, 30.0f, 40.0f));
-
-    scene.addSurface(std::make_unique<PlaneWall>(
-    Vector3D{0,5,0},
-    Vector3D{1,-1,0}.normalize(),
-    0.0f,
-    6.0f,
-    6.0f));
-
-    scene.addSurface(std::make_unique<PlaneWall>(
-    Vector3D{4,-3,2},
-    Vector3D{-1,1,0}.normalize(),
-    0.0f,
-    5.0f,
-    4.0f));
-
-
+    std::string path{"sponza_triangulated_no_cube.obj"};
+    Ray ray(
+    Vector3D(0,0,-10),
+    Vector3D(0,0,1)
+    );
+    ObjLoader loader(path);
+    loader.loadObj(scene);
     
+
     IRSimulationConfig config;
-    config.sourcePosition = {-8, -10, 1.5f};
-    config.numBounces = 200;
+    config.sourcePosition = {3.0f, 0.0f, 1.5f};
+    config.numBounces = 10;
  
     RoomIRSimulator simulator(scene, config);
  
-    Vector3D origin{0, 0, 0};
+    Vector3D listner{0, 0, 1.5};
     std::vector<Ray> rays{
      
     };
-   
-    generateRandomVectors(rays, origin, 500000);
+
+    generateRandomVectors(rays, listner, 1000);
  
     SparseIR sparseIR = simulator.simulate(rays, hitPoints);
  
@@ -81,6 +55,7 @@ int main(){
 
     writePointsToCSV(hitPoints);
     writeIRToCSV(sparseIR);
-    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/ir_test_inverse_decay.wav");
+    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/sponza_2.wav");
+
     return 0;
 }

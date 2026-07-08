@@ -19,7 +19,7 @@ private:
 public:
 
     Triangle(Vector3D A, Vector3D B, Vector3D C, float absorption):
-    e1(B-A), e2(C-A), absorption(absorption), A(A), B(B), C(C)
+     Surface(absorption), e1(B-A), e2(C-A), absorption(absorption), A(A), B(B), C(C)
     {
         Vector3D e1xe2 = e1.cross(e2);
         float length = e1xe2.length();

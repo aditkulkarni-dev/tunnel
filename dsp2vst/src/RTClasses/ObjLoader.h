@@ -1,5 +1,6 @@
 #include <string>
 #include "Surfaces.h"
+#include "Scene.h"
 #include <fstream>
 #include <sstream>
 
@@ -17,7 +18,7 @@ public:
         }
     }
 
-    std::vector<Triangle> parseObjToTriangles(float absorption=0.2f);
+    void loadObj(Scene &scene, float absorption=0.2f);
 
 
 };
