@@ -9,7 +9,7 @@ int ObjLoader::getVertexIdx(const std::string &token)
     return std::stoi(token.substr(0, slash));
 }
 
-std::vector<Triangle> ObjLoader::parseObjToTriangles(float absorption){
+void ObjLoader::loadObj(Scene& scene, float absorption){
     // TODO: insert return statement here
     file.clear();
     file.seekg(0);
@@ -17,7 +17,7 @@ std::vector<Triangle> ObjLoader::parseObjToTriangles(float absorption){
     std::vector<Vector3D> vertices;
     std::vector<Vector3D> normals;
     std::vector<Triangle> triangles;
-
+    int faceLines{0};
 
     while (std::getline(file, line)) // get a line from file to string line
     {
@@ -44,18 +44,29 @@ std::vector<Triangle> ObjLoader::parseObjToTriangles(float absorption){
             continue;
         }
         else if (type == "f"){
+            faceLines++;
             std::string a, b, c;
             ss >> a >> b >> c;
             int i1 = getVertexIdx(a)-1;
             int i2 = getVertexIdx(b)-1;
             int i3 = getVertexIdx(c)-1;
-            triangles.emplace_back(vertices[i1], vertices[i2], vertices[i3], absorption);
+            scene.addSurface(
+                std::make_unique<Triangle>(
+                    vertices[i1],
+                    vertices[i2],
+                    vertices[i3],
+                    absorption
+                )
+            );
+        }
+        else if (type == "o")
+        {
+            std::cout << "Object: " << line << "\n";
         }
 
     }
-    std::cout << "number of vertices : " << vertices.size() << "\n";
-    std::cout << "number of faces : " << triangles.size() << "\n";
 
-    return triangles;
-
+    std::cout << "Scene surfaces: "
+          << scene.getSurfaceCount()
+          << "\n";
 }

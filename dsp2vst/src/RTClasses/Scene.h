@@ -26,7 +26,7 @@ public:
     // travels `maxDistance`. Doesn't care *which* surface blocked it, so it
     // can early-out on the first hit - cheaper than intersectClosest.
     bool isOccluded(const Ray& ray, float maxDistance) const;
-
+    int getSurfaceCount(){return surfaces.size();}
     size_t surfaceCount() const { return surfaces.size(); }
 
 private:

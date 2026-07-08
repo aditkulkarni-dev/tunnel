@@ -77,6 +77,17 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
         float totalPathDistance = ray.accumulatedDistance + distanceToSrc;
         float energy = computeEnergy(totalPathDistance, ray.absorptionHistory);
 
+        if (energy > 1.0f || !std::isfinite(energy)) {
+            std::cout
+                << "Bad energy!\n"
+                << "energy = " << energy << "\n"
+                << "distance = " << totalPathDistance << "\n";
+
+            for (float a : ray.absorptionHistory){
+                std::cout << a << " ";
+        }
+        std::cout << "\n";
+    }
         outIR.gains.push_back(energy);
         outIR.delays.push_back(totalPathDistance);
         outIR.rays.push_back(ray);
