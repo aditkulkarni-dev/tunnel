@@ -53,6 +53,16 @@ int main(){
     std::cout << "Gains size : " << sparseIR.gains.size();
     std::cout << "\n";
 
+
+    /*
+        we need a function here that takes in scene, and new filename for obj,
+        creates a new obj with the stuff that we have inside scene,
+        so we would have a lot of triangles with their ray counts,
+        so we would need to create an obj by giving each triangle a color
+        i dont know how we do that but lets go for it
+    */
+    writeAcousticHeatmapOBJ(scene, "sponza_heatmap.obj", "sponza_mtl.mtl");
+
     writePointsToCSV(hitPoints);
     writeIRToCSV(sparseIR);
     renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/sponza_2.wav");

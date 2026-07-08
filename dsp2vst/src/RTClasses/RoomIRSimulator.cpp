@@ -69,7 +69,8 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
 
     ray.accumulatedDistance += hit.t;
     ray.absorptionHistory.push_back(hitSurface->getAbsorption());
-
+    hitSurface->registerHit();
+    
     Vector3D shadowOrigin = hit.hitPoint + hit.surfaceNormal * config.shadowRayEpsilon;
     float distanceToSrc = 0.0f;
 

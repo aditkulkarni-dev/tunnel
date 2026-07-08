@@ -3,10 +3,14 @@
 
 class Surface{
     protected:
-        float absorptionCoefficient;
+        float absorptionCoefficient=0;
+        uint64_t  hitCount=0;
         
     
     public:
+        void registerHit(){hitCount++;}
+        uint64_t  getHitCount(){return hitCount;}
+
         Surface() = default;
         Surface(float absorption) : absorptionCoefficient(absorption) {}
         virtual ~Surface() = default;
