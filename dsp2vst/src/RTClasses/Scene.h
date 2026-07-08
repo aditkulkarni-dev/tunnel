@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "../RTClasses/Surfaces.h"
+#include <fstream>
 
 // Owns the set of surfaces that make up a room/environment and answers
 // intersection queries against all of them. This decouples "what geometry
@@ -29,6 +30,13 @@ public:
     int getSurfaceCount(){return surfaces.size();}
     size_t surfaceCount() const { return surfaces.size(); }
 
+    const std::vector<std::unique_ptr<Surface>>& getSurfaces() const {
+    return surfaces;
+    }
+
+
 private:
     std::vector<std::unique_ptr<Surface>> surfaces;
 };
+
+void writeAcousticHeatmapOBJ(Scene &scene, std::string obj_filename, std::string mtl_filename);
