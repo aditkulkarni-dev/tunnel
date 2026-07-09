@@ -4,12 +4,16 @@
 class Surface{
     protected:
         float absorptionCoefficient=0;
-        uint64_t  hitCount=0;
+        std::atomic<uint64_t> hitCount=0;
         
     
     public:
-        void registerHit(){hitCount++;}
-        uint64_t  getHitCount(){return hitCount;}
+        void registerHit(){
+            hitCount.fetch_add(1, std::memory_order_relaxed);
+        }
+        uint64_t  getHitCount() const{
+            return hitCount.load(std::memory_order_relaxed);
+        }
 
         Surface() = default;
         Surface(float absorption) : absorptionCoefficient(absorption) {}

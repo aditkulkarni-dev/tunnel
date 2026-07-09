@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "../RTClasses/Surfaces.h"
 #include "./SparseIR.h"
+#include <random>
 
 // Everything that's constant across one simulation run: where the source
 // sits, how many bounces to trace, the shadow-ray offset. Kept separate from
@@ -35,12 +36,12 @@ public:
     // stay consistent across rays at each timestep. Accumulates all
     // NEE-visible paths (plus the direct path, if unobstructed) into a
     // single SparseIR.
-    SparseIR simulate(std::vector<Ray> rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads=16) const;
+    SparseIR simulate(const std::vector<Ray>& rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads=16) const;
 
 private:
     // Direct line-of-sight contribution from source to listenerPos, logged
     // once before any bouncing happens.
-    void addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR) const;
+    void addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialEnergy) const;
 
     // Advances a single ray by exactly one bounce: finds the closest hit,
     // fires a shadow ray toward the source (logging a path if visible),
@@ -55,7 +56,7 @@ private:
 
     // Inverse-square falloff over the full path length, scaled by the
     // product of per-bounce reflection coefficients (1 - absorption).
-    static float computeEnergy(float totalDistance, const std::vector<float>& absorptionHistory);
+    float computeEnergy(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const;
 
     static void merge(const SparseIR& src, SparseIR& dst);
     const Scene& scene;

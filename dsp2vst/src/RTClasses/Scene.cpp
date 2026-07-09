@@ -97,10 +97,10 @@ void writeAcousticHeatmapOBJ(Scene &scene, std::string obj_filename, std::string
             obj << "v " << B.x << " " << B.y << " " << B.z << "\n";
             obj << "v " << C.x << " " << C.y << " " << C.z << "\n";
 
-            if(tri->getHitCount() == 0){
+            if(normalizedHits < 0.33f){
                 obj << "usemtl LowHits" << "\n";
             }
-            else if(tri->getHitCount() < 5){
+            else if(normalizedHits < 0.66f){
                 obj << "usemtl MediumHits" << "\n";
             }
             else{
