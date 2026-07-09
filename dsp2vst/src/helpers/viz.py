@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 
-df = pd.read_csv("../../intersections.csv")
+df = pd.read_csv("../../../intersections.csv")
 
 fig = go.Figure()
 

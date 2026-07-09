@@ -13,27 +13,23 @@
 int main(){
     std::vector<std::pair<int, Vector3D>> hitPoints;
     Scene scene;
-    std::string path{"sponza_triangulated_no_cube.obj"};
-    Ray ray(
-    Vector3D(0,0,-10),
-    Vector3D(0,0,1)
-    );
+    std::string path{"sponza_scaled.obj"};
     ObjLoader loader(path);
     loader.loadObj(scene);
     
 
     IRSimulationConfig config;
-    config.sourcePosition = {3.0f, 0.0f, 1.5f};
-    config.numBounces = 10;
+    config.sourcePosition = {0.01f, 0.01f, 0.01f};
+    config.numBounces = 15;
  
     RoomIRSimulator simulator(scene, config);
  
-    Vector3D listner{0, 0, 1.5};
+    Vector3D listner{-2, 0, 2};
     std::vector<Ray> rays{
      
     };
 
-    generateRandomVectors(rays, listner, 1000);
+    generateRandomVectors(rays, listner, 10000);
  
     SparseIR sparseIR = simulator.simulate(rays, hitPoints);
  
@@ -61,11 +57,11 @@ int main(){
         so we would need to create an obj by giving each triangle a color
         i dont know how we do that but lets go for it
     */
-    writeAcousticHeatmapOBJ(scene, "sponza_heatmap.obj", "sponza_mtl.mtl");
+    writeAcousticHeatmapOBJ(scene, "sponza_scaled_gen.obj", "sponza_scaled_gen.mtl");
 
     writePointsToCSV(hitPoints);
     writeIRToCSV(sparseIR);
-    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/sponza_2.wav");
+    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/sponza_negative.wav");
 
     return 0;
 }
