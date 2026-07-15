@@ -4,6 +4,7 @@
 #include <memory>
 #include "../RTClasses/Surfaces.h"
 #include <fstream>
+#include "BVH.h"
 
 // Owns the set of surfaces that make up a room/environment and answers
 // intersection queries against all of them. This decouples "what geometry
@@ -22,13 +23,14 @@ public:
     // Returns true and fills outRecord (and outSurface, if non-null) on a hit,
     // false if the ray misses everything.
     bool intersectClosest(const Ray& ray, HitRecord& outRecord, Surface** outSurface = nullptr) const;
-
+    bool intersectBVH(const BVHNode* node, const Ray& ray, HitRecord& bestRecord, Surface** bestSurface) const;
     // Shadow-ray / occlusion test: true if something blocks `ray` before it
     // travels `maxDistance`. Doesn't care *which* surface blocked it, so it
     // can early-out on the first hit - cheaper than intersectClosest.
     bool isOccluded(const Ray& ray, float maxDistance) const;
     int getSurfaceCount(){return surfaces.size();}
     size_t surfaceCount() const { return surfaces.size(); }
+    void buildbvh();
 
     const std::vector<std::unique_ptr<Surface>>& getSurfaces() const {
     return surfaces;
@@ -37,6 +39,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<Surface>> surfaces;
+    std::unique_ptr<BVHNode> tree;
 };
 
 void writeAcousticHeatmapOBJ(Scene &scene, std::string obj_filename, std::string mtl_filename);

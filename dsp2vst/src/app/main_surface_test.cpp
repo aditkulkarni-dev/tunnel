@@ -29,7 +29,7 @@ int main(){
      
     };
 
-    generateRandomVectors(rays, listner, 10000);
+    generateRandomVectors(rays, listner, 100000);
  
     SparseIR sparseIR = simulator.simulate(rays, hitPoints);
  

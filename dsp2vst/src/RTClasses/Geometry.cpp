@@ -16,6 +16,14 @@ Vector3D Vector3D::operator*(const Vector3D &other) const
     return Vector3D();
 }
 
+float Vector3D::operator[](int axis) const
+{
+    if (axis == 0){return x;}
+    if (axis == 1) {return y;}
+    return z;
+
+}
+
 Vector3D Vector3D::operator*(float scalar) const
 {
 

@@ -14,6 +14,7 @@ struct Vector3D{
     Vector3D operator+(const Vector3D& other) const;
     Vector3D operator-(const Vector3D& other) const;
     Vector3D operator*(const Vector3D& other) const;
+    float operator[](int axis) const;
     Vector3D operator*(float scalar) const;
     friend std::ostream& operator<<(std::ostream& os, const Vector3D& v);
     float dot(const Vector3D& other) const;

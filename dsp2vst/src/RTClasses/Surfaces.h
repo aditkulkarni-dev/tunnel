@@ -16,10 +16,14 @@ private:
     float absorption;
     float accEnergy;
     static constexpr float EPSILON = 1e-6f;
+    void setCentroid(){
+        centroid = (A+B+C)*(1.0f/3.0f);
+    }
 
 
 
 public:
+    Vector3D centroid;
     Vector3D getA() const { return A; }
     Vector3D getB() const { return B; }
     Vector3D getC() const { return C; }
@@ -27,6 +31,7 @@ public:
     Triangle(Vector3D A, Vector3D B, Vector3D C, float absorption):
      Surface(absorption), e1(B-A), e2(C-A), absorption(absorption), A(A), B(B), C(C)
     {
+        setCentroid();
         Vector3D e1xe2 = e1.cross(e2);
         float length = e1xe2.length();
         if(length > EPSILON){

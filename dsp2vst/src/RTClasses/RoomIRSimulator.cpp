@@ -1,12 +1,13 @@
 #include "RoomIRSimulator.h"
 #include <thread>
 
-RoomIRSimulator::RoomIRSimulator(const Scene& scene, IRSimulationConfig config)
+RoomIRSimulator::RoomIRSimulator(Scene& scene, IRSimulationConfig config)
     : scene(scene), config(config) {}
 
 SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads) const {
     
     SparseIR sparseIR{};
+    scene.buildbvh();
     if (rays.empty()) return sparseIR;
     std::vector<std::thread> workers;
     int THREADS = std::min(threads, (int)rays.size());
@@ -19,10 +20,11 @@ SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std
     }
 
     for (int t{0}; t < THREADS; ++t){
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> dist(0, 1);
-        workers.emplace_back([&, t](){
+ 
+        workers.emplace_back([&, t,
+        gen = std::mt19937(std::random_device{}()),
+         dist = std::uniform_int_distribution<int>(0, 1)
+        ]() mutable{
             for(int r{t*stride}; r < (t+1)*stride && r < rays.size(); ++r){
                 auto ray = rays[r];
                 // implement random flip between + and - here for ray energy
