@@ -26,7 +26,7 @@ struct IRSimulationConfig {
 // back a SparseIR you can hand straight to a convolution engine.
 class RoomIRSimulator {
 public:
-    RoomIRSimulator(const Scene& scene, IRSimulationConfig config);
+    RoomIRSimulator(Scene& scene, IRSimulationConfig config);
 
     // Advances every ray by one bounce, config.numBounces times, in lockstep
     // (bounce 0 for all rays, then bounce 1 for all rays, ...) rather than
@@ -59,6 +59,6 @@ private:
     float computeEnergy(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const;
 
     static void merge(const SparseIR& src, SparseIR& dst);
-    const Scene& scene;
+    Scene& scene;
     IRSimulationConfig config;
 };

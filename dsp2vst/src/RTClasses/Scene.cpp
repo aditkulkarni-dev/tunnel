@@ -6,28 +6,46 @@ void Scene::addSurface(std::unique_ptr<Surface> surface) {
 }
 
 bool Scene::intersectClosest(const Ray& ray, HitRecord& outRecord, Surface** outSurface) const {
-    float tMin = std::numeric_limits<float>::max();
-    Surface* hitSurface = nullptr;
-    HitRecord closest;
 
-    for (const auto& surface : surfaces) {
-        HitRecord record = surface->calculateIntersection(ray);
-        if (record.didHit && record.t < tMin) {
-            tMin = record.t;
-            hitSurface = surface.get();
-            closest = record;
-        }
-    }
+    outRecord.didHit = false;
+    outRecord.t = std::numeric_limits<float>::max();
+    bool ifIntersects = intersectBVH(tree.get(), ray, outRecord, outSurface);
 
-    if (!hitSurface) {
+    return ifIntersects;
+}
+
+bool Scene::intersectBVH(const BVHNode *node, const Ray &ray, HitRecord &bestRecord, Surface **bestSurface) const
+{
+    if (!tree){return false;}
+    
+    if(!node->bounds.intersects(ray)){
         return false;
     }
+    if(node->isLeaf()){
+    bool hitSomething = false;
 
-    outRecord = closest;
-    if (outSurface) {
-        *outSurface = hitSurface;
+    for(Triangle* triangle : node->triangles)
+    {
+        HitRecord record =
+            triangle->calculateIntersection(ray);
+
+        if(record.didHit && record.t < bestRecord.t)
+        {
+            bestRecord = record;
+
+            if(bestSurface)
+                *bestSurface = triangle;
+
+            hitSomething = true;
+        }
     }
-    return true;
+    return hitSomething;
+    }
+
+    bool hitLeft = intersectBVH(node->left.get(), ray, bestRecord, bestSurface);
+    bool hitRight = intersectBVH(node->right.get(), ray, bestRecord, bestSurface);
+
+    return hitLeft || hitRight;
 }
 
 bool Scene::isOccluded(const Ray& ray, float maxDistance) const {
@@ -38,6 +56,19 @@ bool Scene::isOccluded(const Ray& ray, float maxDistance) const {
         }
     }
     return false;
+}
+
+void Scene::buildbvh()
+{
+    std::vector<Triangle*> triangles;
+
+    for (auto& surface : surfaces)
+    {
+        triangles.push_back(
+            static_cast<Triangle*>(surface.get())
+        );
+    }
+    tree = buildBVH(triangles.begin(), triangles.end());
 }
 
 void writeHeatmapMTL(std::string filename)
