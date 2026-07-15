@@ -5,7 +5,36 @@ void Scene::addSurface(std::unique_ptr<Surface> surface) {
     surfaces.push_back(std::move(surface));
 }
 
-bool Scene::intersectClosest(const Ray& ray, HitRecord& outRecord, Surface** outSurface) const {
+bool Scene::anyHitBVH(const BVHNode *root, const Ray &ray, float maxDistance) const
+{
+    if (!tree){return false;}
+    if(!root){return false;}
+    if (!root->bounds.intersects(ray)){
+        return false;
+    }
+    if(root->isLeaf()){
+        for(Triangle* triangle : root->triangles){
+            HitRecord record = triangle->calculateIntersection(ray);
+            // for a direct ray going to source, this probably wont work
+            // we would need to know how much time it takes from source to listener
+            // and if record.t < time from src to listener, return true
+            if (record.didHit && record.t > 0.001f && record.t < maxDistance){
+                return true;
+                
+            }
+        }
+        return false;
+    }
+    bool leftHit = anyHitBVH(root->left.get(), ray, maxDistance);
+    if (leftHit){return true;}
+    bool rightHit = anyHitBVH(root->right.get(), ray, maxDistance);
+    if(rightHit){return true;}
+
+    return false;
+}
+
+bool Scene::intersectClosest(const Ray &ray, HitRecord &outRecord, Surface **outSurface) const
+{
 
     outRecord.didHit = false;
     outRecord.t = std::numeric_limits<float>::max();
@@ -49,13 +78,15 @@ bool Scene::intersectBVH(const BVHNode *node, const Ray &ray, HitRecord &bestRec
 }
 
 bool Scene::isOccluded(const Ray& ray, float maxDistance) const {
-    for (const auto& surface : surfaces) {
-        HitRecord record = surface->calculateIntersection(ray);
-        if (record.didHit && record.t < maxDistance) {
-            return true;
-        }
-    }
-    return false;
+    // for (const auto& surface : surfaces) {
+    //     HitRecord record = surface->calculateIntersection(ray);
+    //     if (record.didHit && record.t < maxDistance) {
+    //         return true;
+    //     }
+    // }
+
+    bool hit = anyHitBVH(tree.get(), ray, maxDistance);
+    return hit;
 }
 
 void Scene::buildbvh()

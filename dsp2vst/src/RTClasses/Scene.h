@@ -22,6 +22,7 @@ public:
     // Finds the nearest surface hit by `ray` across all surfaces in the scene.
     // Returns true and fills outRecord (and outSurface, if non-null) on a hit,
     // false if the ray misses everything.
+    bool anyHitBVH(const BVHNode* root, const Ray& ray, float maxDistance) const;
     bool intersectClosest(const Ray& ray, HitRecord& outRecord, Surface** outSurface = nullptr) const;
     bool intersectBVH(const BVHNode* node, const Ray& ray, HitRecord& bestRecord, Surface** bestSurface) const;
     // Shadow-ray / occlusion test: true if something blocks `ray` before it

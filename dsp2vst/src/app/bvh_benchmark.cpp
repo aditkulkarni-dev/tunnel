@@ -42,7 +42,7 @@ namespace BenchConfig {
     constexpr const char* kObjPath = "sponza_scaled.obj";
 
     // Ray-generation-only benchmark (cheap, so we can afford more trials).
-    const std::vector<int> kRayGenCounts = {1000, 10000, 50000, 100000};
+    const std::vector<int> kRayGenCounts = {1000, 10000, 50000, 100000, 250000, 500000};
     constexpr int kRayGenTrials = 5;
 
     // Full simulate() benchmark grid. Keep this small -- it's O(rays * bounces)
