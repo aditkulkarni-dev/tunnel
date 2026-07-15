@@ -26,17 +26,8 @@ struct BoundingBox{
         float tzmin = std::min(tz1, tz2);
         float tzmax = std::max(tz1, tz2);
 
-        float tEnter = std::max({
-        txmin,
-        tymin,
-        tzmin
-        });
-
-        float tExit = std::min({
-        txmax,
-        tymax,
-        tzmax
-        });
+        float tEnter = std::max(txmin, std::max(tymin, tzmin));
+        float tExit = std::min(txmax, std::min(tymax, tzmax));
 
 
         return tExit >= tEnter && tExit >= 0.0f;
@@ -109,9 +100,10 @@ std::unique_ptr<BVHNode> buildBVH(Iterator begin, Iterator end){
         return node;
     }
     int axis = longestAxis(node->bounds);
-    std::sort(begin, end, [axis](Triangle* a, Triangle* b){return a->centroid[axis] < b->centroid[axis];});
-
     auto mid = begin + count/2;
+    std::nth_element(begin, mid, end, [axis](Triangle* a, Triangle* b){
+        return a->centroid[axis] < b->centroid[axis];
+    });
     node->left = buildBVH(begin, mid);
     node->right = buildBVH(mid, end);
     return node;
