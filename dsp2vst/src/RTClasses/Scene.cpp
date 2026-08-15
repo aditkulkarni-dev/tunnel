@@ -119,6 +119,7 @@ void writeHeatmapMTL(std::string filename)
 void writeAcousticHeatmapOBJ(Scene &scene, std::string obj_filename, std::string mtl_filename)
 {
     uint64_t maxHits{0};
+    float maxHitDensity{0.0f};
     writeHeatmapMTL(mtl_filename);
 
     std::ofstream obj(obj_filename);
@@ -136,6 +137,12 @@ void writeAcousticHeatmapOBJ(Scene &scene, std::string obj_filename, std::string
             if (tri->getHitCount() > 0){
                 trianglesHit++;
             }
+            float density = static_cast<float>(tri->getHitCount()) / std::max(tri->getArea(), 1e-6f);
+
+            if (density > maxHitDensity)
+            {
+                maxHitDensity = density;
+            }
             maxHits = std::max(maxHits, tri->getHitCount());
         }
     }
@@ -152,17 +159,17 @@ void writeAcousticHeatmapOBJ(Scene &scene, std::string obj_filename, std::string
             Vector3D A = tri->getA();
             Vector3D B = tri->getB();
             Vector3D C = tri->getC();
-            float normalizedHits =  static_cast<float>(tri->getHitCount()) / maxHits;
-
-            
+            // float normalizedHits =  static_cast<float>(tri->getHitCount()) / maxHits;
+            float density = static_cast<float>(tri->getHitCount()) / std::max(tri->getArea(), 1e-6f);
+            float normalized = density / maxHitDensity;
             obj << "v " << A.x << " " << A.y << " " << A.z << "\n";
             obj << "v " << B.x << " " << B.y << " " << B.z << "\n";
             obj << "v " << C.x << " " << C.y << " " << C.z << "\n";
 
-            if(normalizedHits < 0.33f){
+            if(normalized < 0.33f){
                 obj << "usemtl LowHits" << "\n";
             }
-            else if(normalizedHits < 0.66f){
+            else if(normalized < 0.66f){
                 obj << "usemtl MediumHits" << "\n";
             }
             else{

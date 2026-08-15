@@ -12,6 +12,7 @@ private:
     Vector3D e1;
     Vector3D e2;
     Vector3D N;
+    float area;
     
     float absorption;
     float accEnergy;
@@ -20,18 +21,28 @@ private:
         centroid = (A+B+C)*(1.0f/3.0f);
     }
 
+    void setArea(){
+        area = (e1.cross(e2)).length() * 0.5f;
+    }
+
 
 
 public:
     Vector3D centroid;
+
+    float getArea() const{return area;}
+
     Vector3D getA() const { return A; }
     Vector3D getB() const { return B; }
     Vector3D getC() const { return C; }
+    std::vector<Vector3D> getTriangle() const {return std::vector<Vector3D>{A, B, C}; }
+
 
     Triangle(Vector3D A, Vector3D B, Vector3D C, float absorption):
      Surface(absorption), e1(B-A), e2(C-A), absorption(absorption), A(A), B(B), C(C)
     {
         setCentroid();
+        setArea();
         Vector3D e1xe2 = e1.cross(e2);
         float length = e1xe2.length();
         if(length > EPSILON){

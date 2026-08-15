@@ -30,7 +30,7 @@ SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std
                 // implement random flip between + and - here for ray energy
                 
                 
-                float sign = dist(gen) ? 1.0f : -1.0f;
+                float sign = 1.0f;
                 ray.energy = sign * std::sqrt(1.0f / rays.size());
                 for (int bounce = 0; bounce < config.numBounces; ++bounce) {
                     advanceRay(ray, threadIR[t]);

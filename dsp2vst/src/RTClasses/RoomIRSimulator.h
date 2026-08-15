@@ -20,22 +20,18 @@ struct IRSimulationConfig {
 // estimation (NEE): every time a ray hits a surface, a shadow ray is fired
 // straight at the source; if it's unobstructed, that path's delay/gain gets
 // logged. Also logs the direct (0-bounce) path if it's unobstructed.
-//
-// This is the reusable core: build a Scene once, pick a config, feed it a
-// batch of rays (e.g. a sphere of directions from a listener position), get
-// back a SparseIR you can hand straight to a convolution engine.
+
 class RoomIRSimulator {
 public:
     RoomIRSimulator(Scene& scene, IRSimulationConfig config);
 
-    // Advances every ray by one bounce, config.numBounces times, in lockstep
-    // (bounce 0 for all rays, then bounce 1 for all rays, ...) rather than
-    // finishing one ray's whole path before starting the next. This is
-    // deliberate, not cosmetic: it's the loop order that lets a later,
-    // time-varying direction D(t) or a shared field that rays read/write
-    // stay consistent across rays at each timestep. Accumulates all
-    // NEE-visible paths (plus the direct path, if unobstructed) into a
-    // single SparseIR.
+    // simulate looks something like this:
+    // for t in threads:
+    //     for ray in thread_rays:
+    //          advance_ray(ray)
+
+    // advance_ray function uses Bounding Volume Hierarchy to find closest intersection
+    // in O(log(n)) worst-case. 
     SparseIR simulate(const std::vector<Ray>& rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads=16) const;
 
 private:
@@ -43,11 +39,7 @@ private:
     // once before any bouncing happens.
     void addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialEnergy) const;
 
-    // Advances a single ray by exactly one bounce: finds the closest hit,
-    // fires a shadow ray toward the source (logging a path if visible),
-    // then reflects the ray off the surface it hit. Mutates `ray` in place.
-    // Returns false if the ray hit nothing (escaped the scene), in which
-    // case the caller should stop advancing it.
+
     bool advanceRay(Ray& ray, SparseIR& outIR) const;
 
     // Fires a shadow ray from `origin` toward the source. Returns true and

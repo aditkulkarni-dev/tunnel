@@ -13,7 +13,7 @@
 int main(){
     std::vector<std::pair<int, Vector3D>> hitPoints;
     Scene scene;
-    std::string path{"sponza_scaled.obj"};
+    std::string path{"subdivided_sponza.obj"};
     ObjLoader loader(path);
     loader.loadObj(scene);
     
@@ -24,12 +24,12 @@ int main(){
  
     RoomIRSimulator simulator(scene, config);
  
-    Vector3D listner{-2, 0, 2};
+    Vector3D listner{0, 1.5, 0};
     std::vector<Ray> rays{
      
     };
 
-    generateRandomVectors(rays, listner, 2000000);
+    generateRandomVectors(rays, listner, 750000);
  
     SparseIR sparseIR = simulator.simulate(rays, hitPoints);
  
@@ -49,14 +49,6 @@ int main(){
     std::cout << "Gains size : " << sparseIR.gains.size();
     std::cout << "\n";
 
-
-    /*
-        we need a function here that takes in scene, and new filename for obj,
-        creates a new obj with the stuff that we have inside scene,
-        so we would have a lot of triangles with their ray counts,
-        so we would need to create an obj by giving each triangle a color
-        i dont know how we do that but lets go for it
-    */
     writeAcousticHeatmapOBJ(scene, "sponza_scaled_gen.obj", "sponza_scaled_gen.mtl");
 
     writePointsToCSV(hitPoints);

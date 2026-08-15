@@ -7,7 +7,6 @@ struct BoundingBox{
     Vector3D min;
     Vector3D max;
     bool intersects(const Ray& ray) const{
-        // IMPLEMENT THIS
         auto o = ray.origin;
         auto d = ray.direction;
 
