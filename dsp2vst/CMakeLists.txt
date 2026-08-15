@@ -193,3 +193,7 @@ add_executable(benchmark_bvh src/app/bvh_benchmark.cpp)
 target_link_libraries(benchmark_bvh PRIVATE SurfaceLib 
                             SndFileTarget
                             ObjLoaderLib)
+
+add_executable(naive_bvh_test src/app/naive_bvh.cpp)
+target_link_libraries(naive_bvh_test PRIVATE SurfaceLib 
+                            ObjLoaderLib)

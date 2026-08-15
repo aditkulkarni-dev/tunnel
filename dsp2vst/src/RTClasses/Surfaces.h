@@ -50,6 +50,17 @@ public:
         }
         
     }
+    Triangle(Vector3D A, Vector3D B, Vector3D C) : Surface(0.0f), e1(B-A), e2(C-A), absorption(0.0f), A(A), B(B), C(C) 
+    {
+        setCentroid();
+        setArea();
+        Vector3D e1xe2 = e1.cross(e2);
+        float length = e1xe2.length();
+        if(length > EPSILON){
+            N = (e1xe2)*(1.0f/length);
+        } 
+    }
+
     HitRecord calculateIntersection(const Ray& ray) const override;
 
 };

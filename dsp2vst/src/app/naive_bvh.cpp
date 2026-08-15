@@ -1,11 +1,15 @@
+#pragma once
 #include "../RTClasses/Geometry.h"
 #include "../RTClasses/Surfaces.h"
 #include <limits>
+#include <iostream>
+#include <memory>
+#include <algorithm>
 
 struct BoundingBox{
     Vector3D min;
     Vector3D max;
-    BoundingBox(std::vector<Triangle*> triangles){
+    BoundingBox(const std::vector<Triangle*>& triangles){
         float min_x = std::numeric_limits<float>::max();
         float min_y = std::numeric_limits<float>::max();
         float min_z = std::numeric_limits<float>::max();
@@ -98,15 +102,27 @@ struct BoundingBox{
 };
 
 struct BVHNode{
-    BoundingBox bounds;
-    std::vector<Triangle*> triangles;
     std::unique_ptr<BVHNode> left;
     std::unique_ptr<BVHNode> right;
+    BoundingBox bounds;
+    std::vector<Triangle*> triangles;
+
     BVHNode() = default;
     
     // constructor to set bounds, left and right
-    BVHNode(std::vector<Triangle*> triangles) : triangles(std::move(triangles)), bounds(this->triangles){
-        
+    BVHNode(std::vector<Triangle*> inputTriangles) : bounds(inputTriangles), triangles(std::move(inputTriangles)){
+        std::cout << "Created LEAF with " << this->triangles.size()
+        << " triangles\n";
+
+        std::cout << "  bounds min: "
+            << bounds.min.x << ", "
+            << bounds.min.y << ", "
+            << bounds.min.z << "\n";
+
+        std::cout << "  bounds max: "
+            << bounds.max.x << ", "
+            << bounds.max.y << ", "
+            << bounds.max.z << "\n";
     }
 
     BVHNode(std::unique_ptr<BVHNode> left, std::unique_ptr<BVHNode> right):
@@ -115,9 +131,6 @@ struct BVHNode{
     {
   
     }
-
-    
-    
 
     bool isLeaf() const{
         return (left == nullptr) && (right == nullptr);
@@ -214,4 +227,137 @@ std::unique_ptr<BVHNode> buildBVH(std::vector<Triangle*> triangles){
     std::unique_ptr<BVHNode> rightNode = buildBVH(rightGroup);
     std::unique_ptr<BVHNode> currentNode = std::make_unique<BVHNode>(std::move(leftNode), std::move(rightNode));
     return currentNode;
+}
+
+int main(){
+
+    Triangle t1(
+        Vector3D{0.0f, 0.0f, 0.0f},
+        Vector3D{1.0f, 0.0f, 0.0f},
+        Vector3D{0.0f, 1.0f, 0.0f}
+    );
+
+    Triangle t2(
+        Vector3D{4.0f, 0.0f, 0.0f},
+        Vector3D{5.0f, 0.0f, 0.0f},
+        Vector3D{4.0f, 1.0f, 0.0f}
+    );
+
+    Triangle t3(
+        Vector3D{0.0f, 5.0f, 2.0f},
+        Vector3D{1.0f, 5.0f, 2.0f},
+        Vector3D{0.0f, 6.0f, 2.0f}
+    );
+
+    std::vector<Triangle*> triangles = {
+        &t1,
+        &t2,
+        &t3
+    };
+
+    auto cwResult = calculate_cw(triangles);
+
+    int axis = static_cast<int>(cwResult[0]);
+    float cw = cwResult[1];
+
+    std::cout << "calculate_cw test\n";
+    std::cout << "Split axis: " << axis << "\n";
+    std::cout << "Split value: " << cw << "\n\n";
+
+    BoundingBox box(triangles);
+
+    std::cout << "BoundingBox test\n";
+    std::cout << "Min: ("
+              << box.min.x << ", "
+              << box.min.y << ", "
+              << box.min.z << ")\n";
+
+    std::cout << "Max: ("
+              << box.max.x << ", "
+              << box.max.y << ", "
+              << box.max.z << ")\n\n";
+
+    std::cout << "Building BVH\n";
+
+    std::unique_ptr<BVHNode> root = buildBVH(triangles);
+
+    if (root == nullptr) {
+        std::cout << "ERROR: BVH root is null!\n";
+        return 1;
+    }
+
+    std::cout << "BVH built successfully.\n";
+    std::cout << "Root is leaf: "
+              << (root->isLeaf() ? "true" : "false")
+              << "\n";
+
+    std::cout << "Root bounds:\n";
+    std::cout << "Min: ("
+              << root->bounds.min.x << ", "
+              << root->bounds.min.y << ", "
+              << root->bounds.min.z << ")\n";
+
+    std::cout << "Max: ("
+              << root->bounds.max.x << ", "
+              << root->bounds.max.y << ", "
+              << root->bounds.max.z << ")\n\n";
+
+    std::cout << "BVH structure\n";
+
+    if (root->left) {
+        std::cout << "Left child exists\n";
+        std::cout << "Left is leaf: "
+                  << (root->left->isLeaf() ? "true" : "false")
+                  << "\n";
+
+        if (root->left->isLeaf()) {
+            std::cout << "Left triangle count: "
+                      << root->left->triangles.size()
+                      << "\n";
+        }
+    }
+
+    if (root->right) {
+        std::cout << "Right child exists\n";
+        std::cout << "Right is leaf: "
+                  << (root->right->isLeaf() ? "true" : "false")
+                  << "\n";
+
+        if (root->right->isLeaf()) {
+            std::cout << "Right triangle count: "
+                      << root->right->triangles.size()
+                      << "\n";
+        }
+    }
+
+    std::cout << "\n";
+
+    Ray hitRay(
+        Vector3D{-1.0f, 0.5f, 0.0f},
+        Vector3D{1.0f, 0.0f, 0.0f}
+    );
+
+    bool hit = root->bounds.intersects(hitRay);
+
+    std::cout << "Ray intersection test\n";
+    std::cout << "Hit ray intersects root bounds: "
+              << (hit ? "true" : "false")
+              << "\n";
+
+
+    // A ray that should miss the box.
+    Ray missRay(
+        Vector3D{-1.0f, -10.0f, 0.0f},
+        Vector3D{1.0f, 0.0f, 0.0f}
+    );
+
+    bool miss = root->bounds.intersects(missRay);
+
+    std::cout << "Miss ray intersects root bounds: "
+              << (miss ? "true" : "false")
+              << "\n";
+
+    
+    return 0;
+
 }
