@@ -29,7 +29,7 @@ int main(){
      
     };
 
-    generateRandomVectors(rays, listner, 750000);
+    generateRandomVectors(rays, listner, 75000);
  
     SparseIR sparseIR = simulator.simulate(rays, hitPoints);
  
@@ -53,7 +53,7 @@ int main(){
 
     writePointsToCSV(hitPoints);
     writeIRToCSV(sparseIR);
-    renderDenseIRFractional(sparseIR, 44100, "C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/sponza_negative.wav");
+    renderDenseIRFractional(sparseIR, 44100, "IRs/sponza.wav");
 
     return 0;
 }

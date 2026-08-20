@@ -37,7 +37,7 @@ public:
 private:
     // Direct line-of-sight contribution from source to listenerPos, logged
     // once before any bouncing happens.
-    void addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialEnergy) const;
+    void addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialamplitude) const;
 
 
     bool advanceRay(Ray& ray, SparseIR& outIR) const;
@@ -48,7 +48,7 @@ private:
 
     // Inverse-square falloff over the full path length, scaled by the
     // product of per-bounce reflection coefficients (1 - absorption).
-    float computeEnergy(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const;
+    float computeamplitude(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const;
 
     static void merge(const SparseIR& src, SparseIR& dst);
     Scene& scene;

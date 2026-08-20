@@ -16,7 +16,7 @@ SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std
     std::vector<std::vector<std::pair<int, Vector3D>>> threadHits(THREADS);
 
     if (!rays.empty()) {
-        addDirectPathIfVisible(rays.front().origin, sparseIR, 1.0f / rays.size());
+        addDirectPathIfVisible(rays.front().origin, sparseIR, std::sqrt(1.0f / rays.size()));
     }
 
     for (int t{0}; t < THREADS; ++t){
@@ -27,11 +27,11 @@ SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std
         ]() mutable{
             for(int r{t*stride}; r < (t+1)*stride && r < rays.size(); ++r){
                 auto ray = rays[r];
-                // implement random flip between + and - here for ray energy
+                // implement random flip between + and - here for ray amplitude
                 
                 
                 float sign = 1.0f;
-                ray.energy = sign * std::sqrt(1.0f / rays.size());
+                ray.amplitude = sign * std::sqrt(1.0f / rays.size());
                 for (int bounce = 0; bounce < config.numBounces; ++bounce) {
                     advanceRay(ray, threadIR[t]);
                 }
@@ -53,7 +53,7 @@ SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std
     return sparseIR;
 }
 
-void RoomIRSimulator::addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialEnergy) const {
+void RoomIRSimulator::addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialamplitude) const {
     Vector3D dirToSrc = config.sourcePosition - listenerPos;
     float distanceToSrc = dirToSrc.length();
     Ray directRay(listenerPos, dirToSrc.normalize());
@@ -62,8 +62,8 @@ void RoomIRSimulator::addDirectPathIfVisible(const Vector3D& listenerPos, Sparse
         return;
     }
 
-    float energy = initialEnergy / (1.0f + distanceToSrc);
-    outIR.gains.push_back(energy);
+    float amplitude = initialamplitude / (1.0f + distanceToSrc);
+    outIR.gains.push_back(amplitude);
     outIR.delays.push_back(distanceToSrc);
     outIR.rays.push_back(directRay);
 }
@@ -79,7 +79,7 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
 
     ray.accumulatedDistance += hit.t;
     float absorption = hitSurface->getAbsorption();
-    ray.energy *= (1.0f - absorption);
+    ray.amplitude *= std::sqrt(1.0f - absorption);
     ray.absorptionHistory.push_back(hitSurface->getAbsorption());
     hitSurface->registerHit();
     Vector3D faceNormal = (ray.direction.dot(hit.surfaceNormal) < 0) ? hit.surfaceNormal : hit.surfaceNormal*-1;
@@ -89,10 +89,10 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
 
     if (nextEventEstimation(shadowOrigin, distanceToSrc)) {
         float totalPathDistance = ray.accumulatedDistance + distanceToSrc;
-        float energy = computeEnergy(totalPathDistance, ray.absorptionHistory, ray);
+        float amplitude = computeamplitude(totalPathDistance, ray.absorptionHistory, ray);
 
-        if (energy > 1.0f || !std::isfinite(energy)) {
-            std::cout << "Bad energy!\n";
+        if (amplitude > 1.0f || !std::isfinite(amplitude)) {
+            std::cout << "Bad amplitude!\n";
 
             for (float a : ray.absorptionHistory){
                 std::cout << a << " ";
@@ -100,7 +100,7 @@ bool RoomIRSimulator::advanceRay(Ray& ray, SparseIR& outIR) const {
         std::cout << "\n";
     }   
         
-        outIR.gains.push_back(energy);
+        outIR.gains.push_back(amplitude);
         outIR.delays.push_back(totalPathDistance);
         outIR.rays.push_back(ray);
     }
@@ -119,9 +119,9 @@ bool RoomIRSimulator::nextEventEstimation(const Vector3D& origin, float& outDist
     return !scene.isOccluded(shadowRay, outDistance);
 }
 
-float RoomIRSimulator::computeEnergy(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const{
+float RoomIRSimulator::computeamplitude(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const{
     
-    return ray.energy / std::max(totalDistance, 1.0f);
+    return ray.amplitude / std::max(totalDistance, 1.0f);
 }
 
 void RoomIRSimulator::merge(const SparseIR &src, SparseIR &dst)

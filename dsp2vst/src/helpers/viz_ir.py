@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import soundfile as sf
 
-ir, sr = sf.read("C:/Program Files/Image-Line/FL Studio 2025/Data/Patches/Impulses/ir_test_inverse_decay.wav"
+ir, sr = sf.read("../../../IRs/sponza.wav"
 )
 fft = np.abs(np.fft.rfft(ir))
 

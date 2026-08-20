@@ -29,6 +29,7 @@ struct Ray{
     Vector3D direction; // Must be normalized
     float accumulatedDistance;
     float energy;
+    float amplitude;
     std::vector<float> absorptionHistory;
     int id;
 
