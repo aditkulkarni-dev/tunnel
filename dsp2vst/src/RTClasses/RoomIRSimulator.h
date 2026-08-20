@@ -5,6 +5,7 @@
 #include "../RTClasses/Surfaces.h"
 #include "./SparseIR.h"
 #include <random>
+#include <cmath>
 
 // Everything that's constant across one simulation run: where the source
 // sits, how many bounces to trace, the shadow-ray offset. Kept separate from
@@ -33,7 +34,8 @@ public:
     // advance_ray function uses Bounding Volume Hierarchy to find closest intersection
     // in O(log(n)) worst-case. 
     SparseIR simulate(const std::vector<Ray>& rays, std::vector<std::pair<int, Vector3D>>& hitPoints, int threads=16) const;
-
+    void applyBeta(SparseIR& sparseIR, int numBins, float fMin, float fMax) const;
+    
 private:
     // Direct line-of-sight contribution from source to listenerPos, logged
     // once before any bouncing happens.
@@ -49,7 +51,7 @@ private:
     // Inverse-square falloff over the full path length, scaled by the
     // product of per-bounce reflection coefficients (1 - absorption).
     float computeamplitude(float totalDistance, const std::vector<float>& absorptionHistory, Ray& ray) const;
-
+    float beta(int numBins, float distance, float fMin, float fMax) const;
     static void merge(const SparseIR& src, SparseIR& dst);
     Scene& scene;
     IRSimulationConfig config;

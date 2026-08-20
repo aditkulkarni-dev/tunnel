@@ -49,8 +49,23 @@ SparseIR RoomIRSimulator::simulate(const std::vector<Ray>& rays, std::vector<std
         //                 threadHits[t].begin(),
         //                 threadHits[t].end());
     }
-    
+    applyBeta(sparseIR, 50, 0.0f, 20000.0f);
     return sparseIR;
+}
+
+void RoomIRSimulator::applyBeta(SparseIR& sparseIR, int numBins, float fMin, float fMax) const{
+    for(int i{0}; i < sparseIR.delays.size(); ++i){
+        sparseIR.gains[i] *= beta(numBins, sparseIR.delays[i], fMin, fMax);
+    }
+}
+
+float RoomIRSimulator::beta(int numBins, float distance, float fMin, float fMax) const{
+    float sum{0.0f};
+    const double pi = std::acos(-1.0f);
+    for(int i{0}; i < numBins; ++i){
+        sum += std::cos((2*pi*distance/343.0f)*(fMin + ((float)i/(numBins-1))*(fMax-fMin)));
+    }
+    return sum/numBins;
 }
 
 void RoomIRSimulator::addDirectPathIfVisible(const Vector3D& listenerPos, SparseIR& outIR, float initialamplitude) const {
